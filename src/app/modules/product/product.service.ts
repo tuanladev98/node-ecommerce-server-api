@@ -88,4 +88,13 @@ export class ProductService {
 
     return query.getMany();
   }
+
+  getPopularProduct() {
+    return this.productRepository
+      .createQueryBuilder('booth')
+      .where('booth.is_delete = 0')
+      .orderBy('RAND()')
+      .take(6)
+      .getMany();
+  }
 }

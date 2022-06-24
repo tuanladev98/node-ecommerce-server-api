@@ -75,12 +75,6 @@ export class ProductController {
     return this.productService.deleteProduct(productId);
   }
 
-  @Get(':productId')
-  @HttpCode(200)
-  getOne(@Param('productId') productId: number) {
-    return this.productService.getOne(productId);
-  }
-
   @Get()
   @HttpCode(200)
   filter(
@@ -90,5 +84,17 @@ export class ProductController {
   ) {
     console.log(categoryId, gender, sort);
     return this.productService.filter(categoryId, gender, sort);
+  }
+
+  @Get('popular')
+  @HttpCode(200)
+  getPopularProduct() {
+    return this.productService.getPopularProduct();
+  }
+
+  @Get(':productId')
+  @HttpCode(200)
+  getOne(@Param('productId') productId: number) {
+    return this.productService.getOne(productId);
   }
 }
