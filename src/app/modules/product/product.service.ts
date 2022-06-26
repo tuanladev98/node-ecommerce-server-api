@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { ProductSizeEntity } from 'src/app/database/entities/product_size.entity';
 
 import { ProductRepository } from 'src/app/repositories/product.repository';
 import { SizeRepository } from 'src/app/repositories/size.repository';
@@ -65,12 +66,23 @@ export class ProductService {
     return await this.productRepository.save({ ...product, isDelete: 1 });
   }
 
-  async getOne(productId: number) {
-    const product = await this.productRepository.findOne(productId);
+  async getOne(code: string) {
+    const product = await this.productRepository.findOne({ where: { code } });
     if (!product || product.isDelete)
       throw new BadRequestException('Product does not exist.');
 
-    return product;
+    const availableSizes = await this.sizeRepository
+      .createQueryBuilder('size')
+      .leftJoin(
+        ProductSizeEntity,
+        'product_size',
+        'product_size.size_id = size.id',
+      )
+      .where('product_size.product_id = :productId', { productId: product.id })
+      .orderBy('size.id', 'ASC')
+      .getMany();
+
+    return { ...product, availableSizes };
   }
 
   filter(categoryId: number, gender: string, sort: string) {
@@ -79,7 +91,8 @@ export class ProductService {
       .where('booth.is_delete = 0');
     if (categoryId)
       query.andWhere('booth.category_id = :categoryId', { categoryId });
-    if (gender) query.andWhere('booth.gender = :gender', { gender });
+    if (gender && gender !== 'ALL')
+      query.andWhere('booth.gender = :gender', { gender });
     if (sort) {
       if (sort === 'NEWEST') query.orderBy('booth.created_at', 'DESC');
       if (sort === 'PRICE_ASC') query.orderBy('booth.price', 'ASC');

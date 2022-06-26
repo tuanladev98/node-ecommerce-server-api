@@ -92,9 +92,9 @@ export class ProductController {
     return this.productService.getPopularProduct();
   }
 
-  @Get(':productId')
+  @Get('find/:code')
   @HttpCode(200)
-  getOne(@Param('productId') productId: number) {
-    return this.productService.getOne(productId);
+  getOne(@Param('code') code: string) {
+    return this.productService.getOne(code);
   }
 }

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Post,
   Req,
@@ -28,5 +29,13 @@ export class CartController {
   ) {
     const userId: number = req.user.userId;
     return this.cartService.addItem(userId, productId, sizeId, quantity);
+  }
+
+  @Get('/get-cart')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.CLIENT)
+  getCart(@Req() req) {
+    const userId: number = req.user.userId;
+    return this.cartService.getCart(userId);
   }
 }

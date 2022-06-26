@@ -12,6 +12,10 @@ export class CartService {
     private readonly sizeRepository: SizeRepository,
   ) {}
 
+  getCart(userId: number) {
+    return this.cartRepository.find({ where: { userId } });
+  }
+
   async addItem(
     userId: number,
     productId: number,
@@ -30,17 +34,19 @@ export class CartService {
     const cartItem = await this.cartRepository.findOne({
       where: { userId, productId, sizeId },
     });
+    console.log(cartItem);
 
-    if (!cartItem) {
-      return this.cartRepository.save(
+    if (!cartItem)
+      await this.cartRepository.save(
         this.cartRepository.create({ userId, productId, sizeId, quantity }),
       );
-    } else {
-      return await this.cartRepository.save({
+    else
+      await this.cartRepository.save({
         ...cartItem,
         quantity: cartItem.quantity + quantity,
       });
-    }
+
+    return await this.cartRepository.find({ where: { userId } });
   }
 
   async updateItem(
