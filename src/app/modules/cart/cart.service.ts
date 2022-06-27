@@ -16,6 +16,23 @@ export class CartService {
     return this.cartRepository.find({ where: { userId } });
   }
 
+  async getCartDetail(userId: number) {
+    const cartItems = await this.cartRepository
+      .createQueryBuilder('cart')
+      .where('cart.user_id = :userId', { userId })
+      .leftJoinAndSelect('cart.product', 'product')
+      .leftJoinAndSelect('cart.size', 'size')
+      .getMany();
+    let total = 0;
+    cartItems.forEach((item) => {
+      total += item.quantity * item.product.price;
+    });
+    return {
+      cartItems,
+      total,
+    };
+  }
+
   async addItem(
     userId: number,
     productId: number,

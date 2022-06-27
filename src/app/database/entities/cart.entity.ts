@@ -28,7 +28,7 @@ export class CartEntity {
   @Column({ type: 'int', name: 'quantity' })
   quantity: number;
 
-  @ManyToOne(() => UserEntity, (product) => product.carts)
+  @ManyToOne(() => UserEntity, (user) => user.carts)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 

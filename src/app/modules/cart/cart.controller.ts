@@ -38,4 +38,12 @@ export class CartController {
     const userId: number = req.user.userId;
     return this.cartService.getCart(userId);
   }
+
+  @Get('/get-cart-detail')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.CLIENT)
+  getCartDetail(@Req() req) {
+    const userId: number = req.user.userId;
+    return this.cartService.getCartDetail(userId);
+  }
 }
