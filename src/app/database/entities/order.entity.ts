@@ -22,6 +22,9 @@ export class OrderEntity extends CommonBaseEntity {
   @Column({ type: 'varchar', name: 'address' })
   address: string;
 
+  @Column({ type: 'varchar', name: 'phone_number' })
+  phoneNumber: string;
+
   @Column({ type: 'varchar', name: 'province' })
   province: string;
 
