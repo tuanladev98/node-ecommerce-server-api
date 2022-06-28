@@ -31,6 +31,12 @@ export class OrderEntity extends CommonBaseEntity {
   @Column({ type: 'varchar', name: 'ward' })
   ward: string;
 
+  @Column({ type: 'varchar', name: 'postcode' })
+  postcode: string;
+
+  @Column({ type: 'text', name: 'note', nullable: true })
+  note?: string;
+
   @Column({
     type: 'enum',
     name: 'status',
