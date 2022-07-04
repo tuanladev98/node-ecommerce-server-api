@@ -20,7 +20,7 @@ export class StatsService {
     const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
 
     return {
-      incomeLastMonth: Number(
+      lastMonth: Number(
         (
           await this.orderRepository
             .createQueryBuilder()
@@ -30,7 +30,7 @@ export class StatsService {
             .getRawOne()
         ).income,
       ),
-      incomeCurrentMonth: Number(
+      currentMonth: Number(
         (
           await this.orderRepository
             .createQueryBuilder()
@@ -52,12 +52,12 @@ export class StatsService {
     const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
 
     return {
-      transactionsLastMonth: await this.orderRepository
+      lastMonth: await this.orderRepository
         .createQueryBuilder()
         .where('YEAR(created_at) = :lastYear', { lastYear })
         .andWhere('MONTH(created_at) = :lastMonth', { lastMonth })
         .getCount(),
-      transactionsCurrentMonth: await this.orderRepository
+      currentMonth: await this.orderRepository
         .createQueryBuilder()
         .where('YEAR(created_at) = :currentYear', { currentYear })
         .andWhere('MONTH(created_at) = :currentMonth', { currentMonth })
@@ -74,7 +74,7 @@ export class StatsService {
     const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
 
     return {
-      quantityLastMonth: Number(
+      lastMonth: Number(
         (
           await this.billRepository
             .createQueryBuilder('bill')
@@ -85,7 +85,7 @@ export class StatsService {
             .getRawOne()
         ).quantity,
       ),
-      quantityCurrentMonth: Number(
+      currentMonth: Number(
         (
           await this.billRepository
             .createQueryBuilder('bill')

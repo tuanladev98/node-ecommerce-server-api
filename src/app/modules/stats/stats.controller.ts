@@ -14,9 +14,9 @@ export class StatsController {
   @Roles(UserRole.ADMIN)
   async statsSummary() {
     return {
-      incomeSummary: await this.statsService.statsSummaryIncome(),
       transactionSummary: await this.statsService.statsSummaryTransaction(),
       quantitySummary: await this.statsService.statsSummaryQuantity(),
+      incomeSummary: await this.statsService.statsSummaryIncome(),
     };
   }
 }
