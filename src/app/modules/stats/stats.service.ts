@@ -3,12 +3,15 @@ import { OrderEntity } from 'src/app/database/entities/order.entity';
 
 import { BillRepository } from 'src/app/repositories/bill.repository';
 import { OrderRepository } from 'src/app/repositories/order.repository';
+import { UserRepository } from 'src/app/repositories/user.repository';
+import { UserRole } from 'src/app/vendors/common/enums';
 
 @Injectable()
 export class StatsService {
   constructor(
     private readonly billRepository: BillRepository,
     private readonly orderRepository: OrderRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async statsSummaryIncome() {
@@ -99,5 +102,23 @@ export class StatsService {
         ).quantity,
       ),
     };
+  }
+
+  getNewestCustomers() {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.role = :role', { role: UserRole.CLIENT })
+      .orderBy('user.created_at', 'DESC')
+      .limit(5)
+      .getMany();
+  }
+
+  getNewestTransactions() {
+    return this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .orderBy('order.created_at', 'DESC')
+      .limit(5)
+      .getMany();
   }
 }

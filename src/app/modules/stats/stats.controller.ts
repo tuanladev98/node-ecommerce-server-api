@@ -19,4 +19,18 @@ export class StatsController {
       incomeSummary: await this.statsService.statsSummaryIncome(),
     };
   }
+
+  @Get('list-newest-customer')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  statsListNewestCustomer() {
+    return this.statsService.getNewestCustomers();
+  }
+
+  @Get('list-newest-transaction')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  statsListNewestTransaction() {
+    return this.statsService.getNewestTransactions();
+  }
 }
