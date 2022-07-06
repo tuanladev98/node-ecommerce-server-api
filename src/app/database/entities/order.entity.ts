@@ -1,6 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { OrderStatus } from 'src/app/vendors/common/enums';
 import { CommonBaseEntity } from './common_base.entity';
+import { UserEntity } from './user.entity';
+import { BillEntity } from './bill.entity';
 
 @Entity('order')
 export class OrderEntity extends CommonBaseEntity {
@@ -47,4 +56,11 @@ export class OrderEntity extends CommonBaseEntity {
     default: OrderStatus.WAITING_CONFIRM,
   })
   status: OrderStatus;
+
+  @ManyToOne(() => UserEntity, (user) => user.orders)
+  @JoinColumn({ name: 'user_id' })
+  user: UserEntity;
+
+  @OneToMany(() => BillEntity, (bill) => bill.order)
+  bills: BillEntity[];
 }

@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { CommonBaseEntity } from './common_base.entity';
 import { Gender, UserRole } from 'src/app/vendors/common/enums';
 import { CartEntity } from './cart.entity';
+import { OrderEntity } from './order.entity';
 
 @Entity('user')
 export class UserEntity extends CommonBaseEntity {
@@ -28,4 +29,7 @@ export class UserEntity extends CommonBaseEntity {
 
   @OneToMany(() => CartEntity, (cart) => cart.user)
   carts: CartEntity[];
+
+  @OneToMany(() => OrderEntity, (order) => order.user)
+  orders: OrderEntity[];
 }
