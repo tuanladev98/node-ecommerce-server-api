@@ -21,6 +21,8 @@ export class StatsController {
   }
 
   @Get('customer-analytics')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
   chartCustomerAnalytics() {
     return this.statsService.statsCustomerAnalyticsByRecentMonth();
   }
