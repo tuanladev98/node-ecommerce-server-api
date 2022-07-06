@@ -82,7 +82,6 @@ export class ProductController {
     @Query('gender') gender: string,
     @Query('sort') sort: string,
   ) {
-    console.log(categoryId, gender, sort);
     return this.productService.filter(categoryId, gender, sort);
   }
 

@@ -20,6 +20,11 @@ export class StatsController {
     };
   }
 
+  @Get('customer-analytics')
+  chartCustomerAnalytics() {
+    return this.statsService.statsCustomerAnalyticsByRecentMonth();
+  }
+
   @Get('list-newest-customer')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN)
