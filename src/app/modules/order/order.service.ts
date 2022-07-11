@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Connection } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 
 import { BillRepository } from 'src/app/repositories/bill.repository';
 import { CartRepository } from 'src/app/repositories/cart.repository';
@@ -16,6 +16,15 @@ export class OrderService {
     private readonly cartRepository: CartRepository,
     private readonly orderRepository: OrderRepository,
   ) {}
+
+  private makeOrderCode(length: number) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * length));
+    }
+    return new Date().toISOString().split('T')[0].replace('-', '') + result;
+  }
 
   async createOrder(
     userId: number,
@@ -48,7 +57,7 @@ export class OrderService {
       const newOrder = await queryRunner.manager.save(
         queryRunner.manager.create(OrderEntity, {
           userId,
-          orderCode: uuidv4(),
+          orderCode: this.makeOrderCode(10),
           amount,
           receiver,
           address,
