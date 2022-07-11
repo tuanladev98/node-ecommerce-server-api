@@ -57,7 +57,7 @@ export class OrderService {
       const newOrder = await queryRunner.manager.save(
         queryRunner.manager.create(OrderEntity, {
           userId,
-          orderCode: this.makeOrderCode(10),
+          orderCode: this.makeOrderCode(5),
           amount,
           receiver,
           address,

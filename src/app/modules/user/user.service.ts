@@ -14,13 +14,17 @@ export class UserService {
   }
 
   getOne(userId: number) {
-    return this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.orders', 'order')
-      .leftJoinAndSelect('order.bills', 'bill')
-      .leftJoinAndSelect('bill.product', 'product')
-      .leftJoinAndSelect('bill.size', 'size')
-      .where('user.id = :userId', { userId })
-      .getOne();
+    return (
+      this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.orders', 'order')
+        .leftJoinAndSelect('order.user', 'user_order')
+        // .leftJoinAndSelect('order.bills', 'bill')
+        // .leftJoinAndSelect('bill.product', 'product')
+        // .leftJoinAndSelect('bill.size', 'size')
+        .where('user.id = :userId', { userId })
+        .orderBy('order.created_at', 'DESC')
+        .getOne()
+    );
   }
 }
