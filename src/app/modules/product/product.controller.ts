@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -41,7 +43,7 @@ export class ProductController {
     );
   }
 
-  @Post('update/:productId')
+  @Put('update/:productId')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN)
@@ -67,7 +69,7 @@ export class ProductController {
     );
   }
 
-  @Post('delete/:productId')
+  @Delete('delete/:productId')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN)
@@ -75,7 +77,7 @@ export class ProductController {
     return this.productService.deleteProduct(productId);
   }
 
-  @Get()
+  @Get('filter')
   @HttpCode(200)
   filter(
     @Query('categoryId') categoryId: number,
@@ -95,5 +97,19 @@ export class ProductController {
   @HttpCode(200)
   getOne(@Param('code') code: string) {
     return this.productService.getOne(code);
+  }
+
+  @Get('all-for-admin')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  getAllForAdminSite() {
+    return this.productService.getAllForAdminSite();
+  }
+
+  @Get('detail-for-admin/:productId')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  getDetailForAdminSite() {
+    return this.productService.getAllForAdminSite();
   }
 }

@@ -110,4 +110,43 @@ export class ProductService {
       .take(6)
       .getMany();
   }
+
+  getAllForAdminSite() {
+    return this.productRepository
+      .createQueryBuilder('product')
+      .select([
+        'product.id AS id',
+        'product.code AS code',
+        'product.product_name AS productName',
+        'product.description AS description',
+        'product.price AS price',
+        'product.gender AS gender',
+        'product.image01 AS image01',
+        'product.image02 AS image02',
+        'SUM(product_size.quantity) AS quantity',
+      ])
+      .leftJoin(
+        ProductSizeEntity,
+        'product_size',
+        'product_size.product_id = product.id',
+      )
+      .where('product.is_delete = 0')
+      .groupBy('product.id')
+      .getRawMany();
+  }
+
+  async getDetailForAdminSite(productId: number) {
+    const productInfo = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.productToSizes', 'prod_size')
+      .leftJoinAndSelect('prod_size.size', 'size')
+      .where('product.id = :productId', { productId })
+      .getOne();
+
+    return {
+      productInfo,
+      statsSalesPerformanceRecent3Month: [],
+    };
+  }
 }
