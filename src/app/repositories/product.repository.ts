@@ -1,12 +1,14 @@
 import { EntityRepository, getConnection, Repository } from 'typeorm';
 
 import { ProductEntity } from '../database/entities/product.entity';
-import { SizeEntity } from '../database/entities/m_size.entity';
 import { ProductSizeEntity } from '../database/entities/product_size.entity';
 
 @EntityRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
-  async createProduct(prodInstance: ProductEntity) {
+  async createProduct(
+    prodInstance: ProductEntity,
+    listSize: { sizeId: number; quantity: number }[],
+  ) {
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -14,18 +16,12 @@ export class ProductRepository extends Repository<ProductEntity> {
     try {
       const newProduct = await queryRunner.manager.save(prodInstance);
 
-      const sizes = await queryRunner.manager
-        .createQueryBuilder(SizeEntity, 'size')
-        .orderBy('RAND()')
-        .take(10)
-        .getMany();
-
       await queryRunner.manager.save(
-        sizes.map((size) => {
+        listSize.map((ele) => {
           return queryRunner.manager.create(ProductSizeEntity, {
             productId: newProduct.id,
-            sizeId: size.id,
-            quantity: 10,
+            sizeId: ele.sizeId,
+            quantity: ele.quantity,
           });
         }),
       );

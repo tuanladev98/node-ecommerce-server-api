@@ -12,17 +12,32 @@ export class ProductService {
     private readonly sizeRepository: SizeRepository,
   ) {}
 
+  private makeProductCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let char = '';
+    for (let i = 0; i < 2; i++) {
+      char += characters.charAt(Math.floor(Math.random() * 2));
+    }
+    let num = '';
+    for (let i = 0; i < 4; i++) {
+      num += '0123456789'.charAt(Math.floor(Math.random() * 4));
+    }
+    return char + num;
+  }
+
   createProduct(
+    categoryId: number,
     productName: string,
-    description: string,
     price: number,
     gender: Gender,
+    description: string,
     image01: string,
     image02: string,
-    categoryId: number,
+    listSize: { sizeId: number; quantity: number }[],
   ) {
     return this.productRepository.createProduct(
       this.productRepository.create({
+        code: this.makeProductCode(),
         productName,
         description,
         price,
@@ -31,6 +46,7 @@ export class ProductService {
         image02,
         categoryId,
       }),
+      listSize,
     );
   }
 

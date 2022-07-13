@@ -24,22 +24,24 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN)
   addProduct(
+    @Body('categoryId') categoryId: number,
     @Body('productName') productName: string,
-    @Body('description') description: string,
     @Body('price') price: number,
     @Body('gender') gender: Gender,
+    @Body('description') description: string,
     @Body('image01') image01: string,
     @Body('image02') image02: string,
-    @Body('categoryId') categoryId: number,
+    @Body('listSize') listSize: { sizeId: number; quantity: number }[],
   ) {
     return this.productService.createProduct(
+      categoryId,
       productName,
-      description,
       price,
       gender,
+      description,
       image01,
       image02,
-      categoryId,
+      listSize,
     );
   }
 
