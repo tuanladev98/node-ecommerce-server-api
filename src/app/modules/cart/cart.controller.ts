@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -31,7 +33,7 @@ export class CartController {
     return this.cartService.addItem(userId, productId, sizeId, quantity);
   }
 
-  @Get('/get-cart')
+  @Get('get-cart')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.CLIENT)
   getCart(@Req() req) {
@@ -39,11 +41,36 @@ export class CartController {
     return this.cartService.getCart(userId);
   }
 
-  @Get('/get-cart-detail')
+  @Get('get-cart-detail')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.CLIENT)
   getCartDetail(@Req() req) {
     const userId: number = req.user.userId;
     return this.cartService.getCartDetail(userId);
+  }
+
+  @Put('update-item')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.CLIENT)
+  updateItem(
+    @Req() req,
+    @Body('productId') productId: number,
+    @Body('sizeId') sizeId: number,
+    @Body('quantity') quantity: number,
+  ) {
+    const userId: number = req.user.userId;
+    return this.cartService.updateItem(userId, productId, sizeId, quantity);
+  }
+
+  @Delete('delete-item')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.CLIENT)
+  deleteItem(
+    @Req() req,
+    @Body('productId') productId: number,
+    @Body('sizeId') sizeId: number,
+  ) {
+    const userId: number = req.user.userId;
+    return this.cartService.deleteItem(userId, productId, sizeId);
   }
 }

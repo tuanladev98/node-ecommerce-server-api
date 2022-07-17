@@ -76,19 +76,21 @@ export class CartService {
       where: { userId, productId, sizeId },
     });
 
-    if (!cartItem) {
-      return this.cartRepository.save(
+    if (!cartItem)
+      await this.cartRepository.save(
         this.cartRepository.create({ userId, productId, sizeId, quantity }),
       );
-    } else {
-      return await this.cartRepository.save({
+    else
+      await this.cartRepository.save({
         ...cartItem,
         quantity,
       });
-    }
+
+    return await this.getCartDetail(userId);
   }
 
   async deleteItem(userId: number, productId: number, sizeId: number) {
-    return this.cartRepository.delete({ userId, productId, sizeId });
+    await this.cartRepository.delete({ userId, productId, sizeId });
+    return await this.getCartDetail(userId);
   }
 }

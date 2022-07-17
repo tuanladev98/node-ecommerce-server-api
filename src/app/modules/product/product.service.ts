@@ -83,7 +83,11 @@ export class ProductService {
   }
 
   async getOne(code: string) {
-    const product = await this.productRepository.findOne({ where: { code } });
+    const product = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .where('product.code = :code', { code })
+      .getOne();
     if (!product || product.isDelete)
       throw new BadRequestException('Product does not exist.');
 
@@ -103,16 +107,17 @@ export class ProductService {
 
   filter(categoryId: number, gender: string, sort: string) {
     const query = this.productRepository
-      .createQueryBuilder('booth')
-      .where('booth.is_delete = 0');
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .where('product.is_delete = 0');
     if (categoryId)
-      query.andWhere('booth.category_id = :categoryId', { categoryId });
+      query.andWhere('product.category_id = :categoryId', { categoryId });
     if (gender && gender !== 'ALL')
-      query.andWhere('booth.gender = :gender', { gender });
+      query.andWhere('product.gender = :gender', { gender });
     if (sort) {
-      if (sort === 'NEWEST') query.orderBy('booth.created_at', 'DESC');
-      if (sort === 'PRICE_ASC') query.orderBy('booth.price', 'ASC');
-      if (sort === 'PRICE_DESC') query.orderBy('booth.price', 'DESC');
+      if (sort === 'NEWEST') query.orderBy('product.created_at', 'DESC');
+      if (sort === 'PRICE_ASC') query.orderBy('product.price', 'ASC');
+      if (sort === 'PRICE_DESC') query.orderBy('product.price', 'DESC');
     }
 
     return query.getMany();
@@ -120,8 +125,9 @@ export class ProductService {
 
   getPopularProduct() {
     return this.productRepository
-      .createQueryBuilder('booth')
-      .where('booth.is_delete = 0')
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .where('product.is_delete = 0')
       .orderBy('RAND()')
       .take(6)
       .getMany();
