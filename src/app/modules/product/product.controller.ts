@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,17 +9,55 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer';
 
 import { Gender, UserRole } from 'src/app/vendors/common/enums';
 import { Roles } from 'src/app/vendors/decorators/role.decorator';
 import { JwtAuthGuard } from 'src/app/vendors/guards/jwt_auth.guard';
+import { FirebaseStorageService } from './firebase_storage.service';
 import { ProductService } from './product.service';
 
 @Controller('product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly firebaseStorageService: FirebaseStorageService,
+  ) {}
+
+  @Post('upload-prd-img')
+  // @UseGuards(JwtAuthGuard)
+  // @Roles(UserRole.ADMIN)
+  @UseInterceptors(
+    FileInterceptor('image', { storage: multer.memoryStorage() }),
+  )
+  uploadProductImage(@UploadedFile() image: Express.Multer.File) {
+    if (!image) throw new BadRequestException('Image is required!');
+
+    const blob = this.firebaseStorageService.bucket.file(`products/test.jpeg`);
+
+    const blobWriter = blob.createWriteStream({
+      metadata: {
+        contentType: image.mimetype,
+      },
+    });
+
+    blobWriter.on('error', (err) => {
+      console.log(err);
+    });
+
+    blobWriter.on('finish', () => {
+      console.log('File uploaded.');
+    });
+
+    blobWriter.end(image.buffer);
+
+    return this.firebaseStorageService.bucket.file('products/test.jpeg');
+  }
 
   @Post('create')
   @UseGuards(JwtAuthGuard)
