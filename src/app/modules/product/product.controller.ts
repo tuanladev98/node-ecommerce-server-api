@@ -55,8 +55,6 @@ export class ProductController {
     });
 
     blobWriter.end(image.buffer);
-
-    return this.firebaseStorageService.bucket.file('products/test.jpeg');
   }
 
   @Post('create')
