@@ -13,6 +13,7 @@ import { CartModule } from './app/modules/cart/cart.module';
 import { OrderModule } from './app/modules/order/order.module';
 import { StatsModule } from './app/modules/stats/stats.module';
 import { UserModule } from './app/modules/user/user.module';
+import { RealtimeModule } from './app/modules/realtime/realtime.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UserModule } from './app/modules/user/user.module';
     OrderModule,
     StatsModule,
     UserModule,
+    RealtimeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
