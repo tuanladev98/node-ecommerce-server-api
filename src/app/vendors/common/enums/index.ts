@@ -13,3 +13,12 @@ export enum OrderStatus {
   PROCESSING = 'PROCESSING',
   DELIVERY = 'DELIVERY',
 }
+
+export enum MessageSender {
+  ADMIN = 'ADMIN',
+  CLIENT = 'CLIENT',
+}
+
+export enum MessageType {
+  TEXT = 'TEXT',
+}
