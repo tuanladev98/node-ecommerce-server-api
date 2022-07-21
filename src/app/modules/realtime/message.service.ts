@@ -52,14 +52,22 @@ export class MessageService {
           .andWhere('m1.sender = :sender', {
             sender: MessageSender.CLIENT,
           })
-          .orderBy('m1.seen = FALSE');
+          .andWhere('m1.seen = FALSE');
       }, 'totalUnseenMessage')
       .where('user.role = :role', { role: UserRole.CLIENT })
       .orderBy('latest_message.created_at', 'DESC')
       .getRawMany();
   }
 
-  getMessages() {
-    return this.messageRepository.find();
+  async getMessages(userId: number, beforeId?: number) {
+    const query = this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.user_id = :userId', { userId })
+      .orderBy('message.created_at', 'DESC');
+
+    // if (beforeId) query.andWhere(`message.id < ${beforeId}`);
+
+    const messages = await query.getMany();
+    return messages.reverse();
   }
 }

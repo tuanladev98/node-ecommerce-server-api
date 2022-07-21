@@ -35,7 +35,7 @@ export class MessageEntity extends CommonBaseEntity {
     default: 0,
     comment: '0 is false, 1 is true',
   })
-  seen: boolean;
+  seen: number;
 
   @Column({ type: 'int', name: 'user_id' })
   userId: number;

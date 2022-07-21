@@ -42,13 +42,6 @@ export class RealtimeGateway
     console.log(`Client [${client.id}] disconnected!`);
   }
 
-  @SubscribeMessage('test')
-  test(@ConnectedSocket() client: Socket, @MessageBody() text: string) {
-    console.log(
-      `Received "test" event from [${client.id}], message: "${text}"`,
-    );
-  }
-
   @SubscribeMessage('client_online')
   handleClientOnline(
     @ConnectedSocket() client: Socket,
@@ -115,5 +108,25 @@ export class RealtimeGateway
     );
 
     this.server.in(ROOM_CLIENT).emit('new_message', message);
+  }
+
+  @SubscribeMessage('admin_seen')
+  async handleAdminSeenConversation(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { clientId: number },
+  ) {
+    const ROOM_CLIENT = `ROOM_FOR_CLIENT_${payload.clientId}`;
+
+    await this.messageRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        seen: 1,
+      })
+      .where('user_id = :userId', { userId: payload.clientId })
+      .andWhere('sender = :sender', { sender: MessageSender.CLIENT })
+      .execute();
+
+    this.server.in(ROOM_CLIENT).emit('admin_seen_message_for_client', payload);
   }
 }
