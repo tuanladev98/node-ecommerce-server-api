@@ -12,10 +12,14 @@ export class RealtimeController {
   @Get('conversations')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN)
-  getAllConversations() {}
+  getAllConversations() {
+    return this.messageService.getAllConversations();
+  }
 
-  @Get('conversations')
+  @Get('conversation/:userId')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN, UserRole.CLIENT)
-  getMessages() {}
+  getMessages() {
+    return this.messageService.getMessages();
+  }
 }

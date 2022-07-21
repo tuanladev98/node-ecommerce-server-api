@@ -3,6 +3,7 @@ import { CommonBaseEntity } from './common_base.entity';
 import { Gender, UserRole } from 'src/app/vendors/common/enums';
 import { CartEntity } from './cart.entity';
 import { OrderEntity } from './order.entity';
+import { MessageEntity } from './message.entity';
 
 @Entity('user')
 export class UserEntity extends CommonBaseEntity {
@@ -21,8 +22,8 @@ export class UserEntity extends CommonBaseEntity {
   @Column({ type: 'varchar', name: 'name' })
   name: string;
 
-  // @Column({ type: 'varchar', name: 'address', nullable: true })
-  // address: string;
+  @Column({ type: 'varchar', name: 'user_color' })
+  userColor: string;
 
   @Column({ type: 'enum', enum: Gender, default: Gender.MALE })
   gender: Gender;
@@ -32,4 +33,7 @@ export class UserEntity extends CommonBaseEntity {
 
   @OneToMany(() => OrderEntity, (order) => order.user)
   orders: OrderEntity[];
+
+  @OneToMany(() => MessageEntity, (message) => message.user)
+  messages: MessageEntity[];
 }

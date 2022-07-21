@@ -25,7 +25,7 @@ export class ProductEntity extends CommonBaseEntity {
   productName: string;
 
   @Column({ type: 'text', name: 'description', nullable: true })
-  description: string;
+  description?: string;
 
   @Column({ type: 'int', name: 'price' })
   price: number;

@@ -12,16 +12,16 @@ export class SizeEntity {
   length: string;
 
   @Column({ type: 'varchar', name: 'eu_size', nullable: true })
-  euSize: string;
+  euSize?: string;
 
   @Column({ type: 'varchar', name: 'uk_size', nullable: true })
-  ukSize: string;
+  ukSize?: string;
 
   @Column({ type: 'varchar', name: 'us_men_size', nullable: true })
-  usMenSize: string;
+  usMenSize?: string;
 
   @Column({ type: 'varchar', name: 'us_women_size', nullable: true })
-  usWomenSize: string;
+  usWomenSize?: string;
 
   @OneToMany(() => ProductSizeEntity, (sizeToProduct) => sizeToProduct.size)
   sizeToProducts: ProductSizeEntity[];
