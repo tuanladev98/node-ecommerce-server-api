@@ -10,8 +10,8 @@ export class RealtimeController {
   constructor(private readonly messageService: MessageService) {}
 
   @Get('conversations')
-  // @UseGuards(JwtAuthGuard)
-  // @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
   getAllConversations() {
     return this.messageService.getAllConversations();
   }
