@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 
 import { MessageService } from './message.service';
 import { JwtAuthGuard } from 'src/app/vendors/guards/jwt_auth.guard';
@@ -19,10 +19,7 @@ export class RealtimeController {
   @Get('conversation/:userId')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN, UserRole.CLIENT)
-  getMessages(
-    @Param('userId') userId: number,
-    @Query('beforeId') beforeId?: number,
-  ) {
-    return this.messageService.getMessages(userId, beforeId);
+  getMessages(@Param('userId') userId: number) {
+    return this.messageService.getMessages(userId);
   }
 }

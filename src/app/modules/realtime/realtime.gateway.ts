@@ -77,8 +77,6 @@ export class RealtimeGateway
       payload.clientId,
     );
 
-    console.log(convData);
-
     this.server
       .in(this.ROOM_ADMIN)
       .emit('has_new_message_from_client', convData);
@@ -124,6 +122,14 @@ export class RealtimeGateway
     );
 
     this.server.in(ROOM_CLIENT).emit('new_message', message);
+
+    const convData = await this.messageService.getConversation(
+      payload.clientId,
+    );
+
+    this.server
+      .in(this.ROOM_ADMIN)
+      .emit('has_new_message_from_admin', convData);
   }
 
   @SubscribeMessage('admin_seen')

@@ -26,10 +26,10 @@ export class MessageService {
             .select([
               'm.*',
               'ROW_NUMBER() OVER (PARTITION BY m.user_id ORDER BY m.created_at DESC) AS rn',
-            ])
-            .where('m.sender = :sender', {
-              sender: MessageSender.CLIENT,
-            });
+            ]);
+          // .where('m.sender = :sender', {
+          //   sender: MessageSender.CLIENT,
+          // });
         },
         'latest_message',
         'latest_message.user_id = user.id AND latest_message.rn = 1',
@@ -39,6 +39,7 @@ export class MessageService {
         'user.name AS name',
         'user.user_color AS userColor',
         'latest_message.text AS latestMessage',
+        'latest_message.sender AS latestMessageSender',
         'latest_message.created_at AS latestMessageDate',
       ])
       .addSelect((subQuery) => {
@@ -69,10 +70,10 @@ export class MessageService {
             .select([
               'm.*',
               'ROW_NUMBER() OVER (PARTITION BY m.user_id ORDER BY m.created_at DESC) AS rn',
-            ])
-            .where('m.sender = :sender', {
-              sender: MessageSender.CLIENT,
-            });
+            ]);
+          // .where('m.sender = :sender', {
+          //   sender: MessageSender.CLIENT,
+          // });
         },
         'latest_message',
         'latest_message.user_id = user.id AND latest_message.rn = 1',
@@ -82,6 +83,7 @@ export class MessageService {
         'user.name AS name',
         'user.user_color AS userColor',
         'latest_message.text AS latestMessage',
+        'latest_message.sender AS latestMessageSender',
         'latest_message.created_at AS latestMessageDate',
       ])
       .addSelect((subQuery) => {
@@ -102,15 +104,11 @@ export class MessageService {
       .getRawOne();
   }
 
-  async getMessages(userId: number, beforeId?: number) {
-    const query = this.messageRepository
+  getMessages(userId: number) {
+    return this.messageRepository
       .createQueryBuilder('message')
       .where('message.user_id = :userId', { userId })
-      .orderBy('message.created_at', 'DESC');
-
-    // if (beforeId) query.andWhere(`message.id < ${beforeId}`);
-
-    const messages = await query.getMany();
-    return messages.reverse();
+      .orderBy('message.created_at', 'ASC')
+      .getMany();
   }
 }
