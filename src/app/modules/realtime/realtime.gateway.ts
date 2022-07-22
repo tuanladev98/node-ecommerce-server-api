@@ -12,6 +12,7 @@ import { Server, Socket } from 'socket.io';
 
 import { MessageRepository } from 'src/app/repositories/message.repository';
 import { MessageSender } from 'src/app/vendors/common/enums';
+import { MessageService } from './message.service';
 
 @WebSocketGateway({
   cors: {
@@ -28,7 +29,12 @@ export class RealtimeGateway
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly messageRepository: MessageRepository) {}
+  private readonly ROOM_ADMIN = 'ROOM_FOR_ADMIN';
+
+  constructor(
+    private readonly messageRepository: MessageRepository,
+    private readonly messageService: MessageService,
+  ) {}
 
   afterInit() {
     console.log(`Realtime gateway initialized!`);
@@ -66,6 +72,16 @@ export class RealtimeGateway
     );
 
     this.server.in(ROOM_CLIENT).emit('new_message', message);
+
+    const convData = await this.messageService.getConversation(
+      payload.clientId,
+    );
+
+    console.log(convData);
+
+    this.server
+      .in(this.ROOM_ADMIN)
+      .emit('has_new_message_from_client', convData);
   }
 
   @SubscribeMessage('admin_online')
@@ -73,7 +89,7 @@ export class RealtimeGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { adminId: number },
   ) {
-    client.join(`ROOM_FOR_ADMIN_${payload.adminId}`);
+    client.join(`ROOM_FOR_ADMIN`);
   }
 
   @SubscribeMessage('admin_join_client_room')
@@ -115,8 +131,6 @@ export class RealtimeGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { clientId: number },
   ) {
-    const ROOM_CLIENT = `ROOM_FOR_CLIENT_${payload.clientId}`;
-
     await this.messageRepository
       .createQueryBuilder()
       .update()
@@ -127,6 +141,8 @@ export class RealtimeGateway
       .andWhere('sender = :sender', { sender: MessageSender.CLIENT })
       .execute();
 
-    this.server.in(ROOM_CLIENT).emit('admin_seen_message_for_client', payload);
+    this.server
+      .in(this.ROOM_ADMIN)
+      .emit('admin_seen_message_for_client', payload);
   }
 }
