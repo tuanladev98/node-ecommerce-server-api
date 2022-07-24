@@ -76,7 +76,7 @@ export class OrderEntity extends CommonBaseEntity {
     type: 'enum',
     name: 'status',
     enum: OrderStatus,
-    default: OrderStatus.WAITING_CONFIRM,
+    default: OrderStatus.PROCESSING,
   })
   status: OrderStatus;
 

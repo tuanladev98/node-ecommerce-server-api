@@ -9,9 +9,9 @@ export enum Gender {
 }
 
 export enum OrderStatus {
-  WAITING_CONFIRM = 'WAITING_CONFIRM',
   PROCESSING = 'PROCESSING',
-  DELIVERY = 'DELIVERY',
+  READY_DELIVERY = 'PREPARING_SHIPMENT',
+  DELIVERY = 'DELIVERED',
 }
 
 export enum MessageSender {

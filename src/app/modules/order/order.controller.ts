@@ -64,20 +64,13 @@ export class OrderController {
     return this.orderService.getOrderDetail(userId, orderCode);
   }
 
-  // @Post('stripe-payment')
-  // @UseGuards(JwtAuthGuard)
-  // @Roles(UserRole.CLIENT)
-  // handleStripePayment(
-  //   @Body('tokenId') tokenId: string,
-  //   @Body('amount') amount: number,
-  // ) {
-  //   // stripe.
-  //   return this.stripePayment.charges.create({
-  //     source: tokenId,
-  //     amount,
-  //     currency: 'usd',
-  //   });
-  // }
+  @Get('order-history')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.CLIENT)
+  getOrderHistory(@Req() req) {
+    const userId: number = req.user.userId;
+    return this.orderService.getOrderHistory(userId);
+  }
 
   @Post('create-stripe-payment-intent')
   @UseGuards(JwtAuthGuard)

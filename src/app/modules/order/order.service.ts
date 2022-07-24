@@ -111,7 +111,20 @@ export class OrderService {
 
     if (!order || order.userId !== userId) return null;
 
+    console.log(order);
+
     return order;
+  }
+
+  getOrderHistory(userId: number) {
+    return this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.bills', 'bill')
+      .leftJoinAndSelect('bill.product', 'product')
+      .leftJoinAndSelect('bill.size', 'size')
+      .where('order.user_id = :userId', { userId })
+      .orderBy('order.created_at', 'DESC')
+      .getMany();
   }
 
   updateOrderPayment(orderCode: string, paymentIntentId: string) {
