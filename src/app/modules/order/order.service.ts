@@ -127,6 +127,17 @@ export class OrderService {
       .getMany();
   }
 
+  getAll() {
+    return this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.bills', 'bill')
+      .leftJoinAndSelect('bill.product', 'product')
+      .leftJoinAndSelect('bill.size', 'size')
+      .orderBy('order.created_at', 'DESC')
+      .getMany();
+  }
+
   updateOrderPayment(orderCode: string, paymentIntentId: string) {
     return this.orderRepository.update(
       { orderCode },

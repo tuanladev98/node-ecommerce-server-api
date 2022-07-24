@@ -72,6 +72,13 @@ export class OrderController {
     return this.orderService.getOrderHistory(userId);
   }
 
+  @Get('get-all')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  getAll() {
+    return this.orderService.getAll();
+  }
+
   @Post('create-stripe-payment-intent')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.CLIENT)

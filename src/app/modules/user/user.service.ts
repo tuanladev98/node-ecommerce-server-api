@@ -9,6 +9,7 @@ export class UserService {
   getAll() {
     return this.userRepository
       .createQueryBuilder('user')
+      .leftJoinAndSelect('user.orders', 'order')
       .where('user.role = :role', { role: UserRole.CLIENT })
       .getMany();
   }

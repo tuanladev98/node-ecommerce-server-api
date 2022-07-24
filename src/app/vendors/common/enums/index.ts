@@ -10,8 +10,8 @@ export enum Gender {
 
 export enum OrderStatus {
   PROCESSING = 'PROCESSING',
-  READY_DELIVERY = 'PREPARING_SHIPMENT',
-  DELIVERY = 'DELIVERED',
+  PREPARING_SHIPMENT = 'PREPARING_SHIPMENT',
+  DELIVERED = 'DELIVERED',
 }
 
 export enum MessageSender {
