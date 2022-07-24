@@ -7,6 +7,7 @@ import { CartRepository } from 'src/app/repositories/cart.repository';
 import { OrderRepository } from 'src/app/repositories/order.repository';
 import { OrderEntity } from 'src/app/database/entities/order.entity';
 import { BillEntity } from 'src/app/database/entities/bill.entity';
+import { CartEntity } from 'src/app/database/entities/cart.entity';
 
 @Injectable()
 export class OrderService {
@@ -81,6 +82,13 @@ export class OrderService {
         }),
       );
 
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from(CartEntity)
+        .where('user_id = :userId', { userId })
+        .execute();
+
       await queryRunner.commitTransaction();
 
       return newOrder;
@@ -90,5 +98,19 @@ export class OrderService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async getOrderDetail(userId: number, orderCode: string) {
+    const order = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.bills', 'bill')
+      .leftJoinAndSelect('bill.product', 'product')
+      .leftJoinAndSelect('bill.size', 'size')
+      .where('order.order_code = :orderCode', { orderCode })
+      .getOne();
+
+    if (!order || order.userId !== userId) return null;
+
+    return order;
   }
 }

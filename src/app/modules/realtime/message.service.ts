@@ -104,11 +104,28 @@ export class MessageService {
       .getRawOne();
   }
 
-  getMessages(userId: number) {
-    return this.messageRepository
+  async getMessages(userId: number) {
+    const messages = await this.messageRepository
       .createQueryBuilder('message')
       .where('message.user_id = :userId', { userId })
       .orderBy('message.created_at', 'ASC')
       .getMany();
+
+    if (messages.length) return messages;
+
+    return await this.messageRepository.save(
+      this.messageRepository.create([
+        {
+          sender: MessageSender.ADMIN,
+          text: 'Xin chào!',
+          userId,
+        },
+        {
+          sender: MessageSender.ADMIN,
+          text: 'Chúng tôi có thể hỗ trợ điều gì cho bạn không?',
+          userId,
+        },
+      ]),
+    );
   }
 }

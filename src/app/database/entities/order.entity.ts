@@ -37,26 +37,40 @@ export class OrderEntity extends CommonBaseEntity {
   @Column({ type: 'varchar', name: 'province' })
   province: string;
 
-  @Column({ type: 'int', name: 'ghn_province_id' })
-  ghnProvinceId: number;
+  // @Column({ type: 'int', name: 'ghn_province_id' })
+  // ghnProvinceId: number;
 
   @Column({ type: 'varchar', name: 'district' })
   district: string;
 
-  @Column({ type: 'int', name: 'ghn_district_id' })
-  ghnDistrictId: string;
+  // @Column({ type: 'int', name: 'ghn_district_id' })
+  // ghnDistrictId: string;
 
   @Column({ type: 'varchar', name: 'ward' })
   ward: string;
 
-  @Column({ type: 'int', name: 'ghn_ward_id' })
-  ghnWardId: string;
+  // @Column({ type: 'int', name: 'ghn_ward_id' })
+  // ghnWardId: string;
 
   @Column({ type: 'varchar', name: 'postcode' })
   postcode: string;
 
   @Column({ type: 'text', name: 'note', nullable: true })
   note?: string;
+
+  @Column({
+    type: 'varchar',
+    name: 'stripe_succeeded_payment_intent_id',
+    nullable: true,
+  })
+  stripeSucceededPaymentIntentId?: string;
+
+  @Column({
+    type: 'varchar',
+    name: 'ghn_shipping_code',
+    nullable: true,
+  })
+  ghnShippingCode?: string;
 
   @Column({
     type: 'enum',

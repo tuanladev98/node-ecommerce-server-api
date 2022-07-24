@@ -82,6 +82,22 @@ export class RealtimeGateway
       .emit('has_new_message_from_client', convData);
   }
 
+  @SubscribeMessage('client_seen')
+  async handleClientSeenConversation(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { clientId: number },
+  ) {
+    await this.messageRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        seen: 1,
+      })
+      .where('user_id = :userId', { userId: payload.clientId })
+      .andWhere('sender = :sender', { sender: MessageSender.ADMIN })
+      .execute();
+  }
+
   @SubscribeMessage('admin_online')
   handleAdminOnline(
     @ConnectedSocket() client: Socket,
