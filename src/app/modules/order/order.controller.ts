@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -81,15 +82,31 @@ export class OrderController {
   @Post('create-stripe-payment-intent')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.CLIENT)
-  createStripePaymentIntent(
+  async createStripePaymentIntent(
     @Body('amount') amount: number,
     @Body('currency') currency: string,
     @Body('paymentMethodType') paymentMethodType: string,
   ) {
-    return this.stripePayment.paymentIntents.create({
-      amount,
-      currency,
-      payment_method_types: [paymentMethodType],
-    });
+    try {
+      const paymentIntent = await this.stripePayment.paymentIntents.create({
+        amount,
+        currency,
+        payment_method_types: [paymentMethodType],
+      });
+
+      return { clientSecret: paymentIntent.client_secret };
+    } catch (error) {
+      return { error: { message: error.message } };
+    }
+  }
+
+  @Put('update-payment/:orderCode')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.CLIENT)
+  updateOrderPayment(
+    @Param('orderCode') orderCode: string,
+    @Body('paymentIntentId') paymentIntentId: string,
+  ) {
+    return this.orderService.updateOrderPayment(orderCode, paymentIntentId);
   }
 }

@@ -113,4 +113,11 @@ export class OrderService {
 
     return order;
   }
+
+  updateOrderPayment(orderCode: string, paymentIntentId: string) {
+    return this.orderRepository.update(
+      { orderCode },
+      { stripeSucceededPaymentIntentId: paymentIntentId },
+    );
+  }
 }
