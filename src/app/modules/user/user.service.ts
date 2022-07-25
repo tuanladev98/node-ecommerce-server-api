@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from 'src/app/repositories/user.repository';
-import { UserRole } from 'src/app/vendors/common/enums';
+import { UserLogRepository } from 'src/app/repositories/user_log.repository';
+import { UserLogType, UserRole } from 'src/app/vendors/common/enums';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly userLogRepository: UserLogRepository,
+  ) {}
 
   getAll() {
     return this.userRepository
@@ -26,6 +30,15 @@ export class UserService {
         .where('user.id = :userId', { userId })
         .orderBy('order.created_at', 'DESC')
         .getOne()
+    );
+  }
+
+  addLog(userId: number, logType: UserLogType) {
+    return this.userLogRepository.save(
+      this.userLogRepository.create({
+        userId,
+        logType,
+      }),
     );
   }
 }
