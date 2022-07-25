@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Connection } from 'typeorm';
-import { OrderEntity } from 'src/app/database/entities/order.entity';
 
 import { BillRepository } from 'src/app/repositories/bill.repository';
 import { OrderRepository } from 'src/app/repositories/order.repository';
 import { UserRepository } from 'src/app/repositories/user.repository';
-import { UserRole } from 'src/app/vendors/common/enums';
+import { UserLogType, UserRole } from 'src/app/vendors/common/enums';
+import { UserLogRepository } from 'src/app/repositories/user_log.repository';
 
 @Injectable()
 export class StatsService {
@@ -14,6 +14,7 @@ export class StatsService {
     private readonly billRepository: BillRepository,
     private readonly orderRepository: OrderRepository,
     private readonly userRepository: UserRepository,
+    private readonly userLogRepository: UserLogRepository,
   ) {}
 
   async statsSummaryIncome() {
@@ -30,7 +31,8 @@ export class StatsService {
           await this.orderRepository
             .createQueryBuilder()
             .select('SUM(amount) AS income')
-            .where('YEAR(created_at) = :lastYear', { lastYear })
+            .where('stripe_succeeded_payment_intent_id IS NOT NULL')
+            .andWhere('YEAR(created_at) = :lastYear', { lastYear })
             .andWhere('MONTH(created_at) = :lastMonth', { lastMonth })
             .getRawOne()
         ).income,
@@ -40,7 +42,8 @@ export class StatsService {
           await this.orderRepository
             .createQueryBuilder()
             .select('SUM(amount) AS income')
-            .where('YEAR(created_at) = :currentYear', { currentYear })
+            .where('stripe_succeeded_payment_intent_id IS NOT NULL')
+            .andWhere('YEAR(created_at) = :currentYear', { currentYear })
             .andWhere('MONTH(created_at) = :currentMonth', { currentMonth })
             .getRawOne()
         ).income,
@@ -70,7 +73,7 @@ export class StatsService {
     };
   }
 
-  async statsSummaryQuantity() {
+  async statsSummaryLoginQuantity() {
     const current = new Date();
     const currentYear = current.getUTCFullYear();
     const currentMonth = current.getUTCMonth() + 1;
@@ -79,30 +82,20 @@ export class StatsService {
     const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
 
     return {
-      lastMonth: Number(
-        (
-          await this.billRepository
-            .createQueryBuilder('bill')
-            .leftJoin(OrderEntity, 'order', 'order.id = bill.order_id')
-            .where('YEAR(order.created_at) = :lastYear', { lastYear })
-            .andWhere('MONTH(order.created_at) = :lastMonth', { lastMonth })
-            .select('SUM(quantity) AS quantity')
-            .getRawOne()
-        ).quantity,
-      ),
-      currentMonth: Number(
-        (
-          await this.billRepository
-            .createQueryBuilder('bill')
-            .leftJoin(OrderEntity, 'order', 'order.id = bill.order_id')
-            .where('YEAR(order.created_at) = :currentYear', { currentYear })
-            .andWhere('MONTH(order.created_at) = :currentMonth', {
-              currentMonth,
-            })
-            .select('SUM(quantity) AS quantity')
-            .getRawOne()
-        ).quantity,
-      ),
+      lastMonth: await this.userLogRepository
+        .createQueryBuilder('user_log')
+        .where('user_log.log_type = :logType', { logType: UserLogType.LOGIN })
+        .andWhere('YEAR(user_log.created_at) = :lastYear', { lastYear })
+        .andWhere('MONTH(user_log.created_at) = :lastMonth', { lastMonth })
+        .getCount(),
+      currentMonth: await this.userLogRepository
+        .createQueryBuilder('user_log')
+        .where('user_log.log_type = :logType', { logType: UserLogType.LOGIN })
+        .andWhere('YEAR(user_log.created_at) = :currentYear', { currentYear })
+        .andWhere('MONTH(user_log.created_at) = :currentMonth', {
+          currentMonth,
+        })
+        .getCount(),
     };
   }
 

@@ -15,7 +15,7 @@ export class StatsController {
   async statsSummary() {
     return {
       transactionSummary: await this.statsService.statsSummaryTransaction(),
-      quantitySummary: await this.statsService.statsSummaryQuantity(),
+      loginQuantitySummary: await this.statsService.statsSummaryLoginQuantity(),
       incomeSummary: await this.statsService.statsSummaryIncome(),
     };
   }

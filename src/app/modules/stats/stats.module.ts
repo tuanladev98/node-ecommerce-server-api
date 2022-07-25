@@ -7,12 +7,14 @@ import { OrderRepository } from 'src/app/repositories/order.repository';
 import { ProductRepository } from 'src/app/repositories/product.repository';
 import { UserRepository } from 'src/app/repositories/user.repository';
 import { BillRepository } from 'src/app/repositories/bill.repository';
+import { UserLogRepository } from 'src/app/repositories/user_log.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       BillRepository,
       UserRepository,
+      UserLogRepository,
       ProductRepository,
       OrderRepository,
     ]),
