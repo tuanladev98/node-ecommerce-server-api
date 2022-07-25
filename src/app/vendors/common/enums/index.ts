@@ -14,6 +14,10 @@ export enum OrderStatus {
   DELIVERED = 'DELIVERED',
 }
 
+export enum UserLogType {
+  LOGIN = 'LOGIN',
+}
+
 export enum MessageSender {
   ADMIN = 'ADMIN',
   CLIENT = 'CLIENT',

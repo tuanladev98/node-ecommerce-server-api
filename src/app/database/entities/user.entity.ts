@@ -4,6 +4,7 @@ import { Gender, UserRole } from 'src/app/vendors/common/enums';
 import { CartEntity } from './cart.entity';
 import { OrderEntity } from './order.entity';
 import { MessageEntity } from './message.entity';
+import { UserLogEntity } from './user_log.entity';
 
 @Entity('user')
 export class UserEntity extends CommonBaseEntity {
@@ -36,4 +37,7 @@ export class UserEntity extends CommonBaseEntity {
 
   @OneToMany(() => MessageEntity, (message) => message.user)
   messages: MessageEntity[];
+
+  @OneToMany(() => UserLogEntity, (userLog) => userLog.user)
+  userLogs: UserLogEntity[];
 }
