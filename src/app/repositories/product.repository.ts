@@ -5,10 +5,7 @@ import { ProductSizeEntity } from '../database/entities/product_size.entity';
 
 @EntityRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
-  async createProduct(
-    prodInstance: ProductEntity,
-    listSize: { sizeId: number; quantity: number }[],
-  ) {
+  async createProduct(prodInstance: ProductEntity, sizeIds: number[]) {
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -17,11 +14,11 @@ export class ProductRepository extends Repository<ProductEntity> {
       const newProduct = await queryRunner.manager.save(prodInstance);
 
       await queryRunner.manager.save(
-        listSize.map((ele) => {
+        sizeIds.map((sizeId) => {
           return queryRunner.manager.create(ProductSizeEntity, {
             productId: newProduct.id,
-            sizeId: ele.sizeId,
-            quantity: ele.quantity,
+            sizeId,
+            quantity: Math.floor(Math.random() * 20),
           });
         }),
       );

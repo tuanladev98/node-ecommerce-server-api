@@ -68,7 +68,7 @@ export class ProductController {
     @Body('description') description: string,
     @Body('image01') image01: string,
     @Body('image02') image02: string,
-    @Body('listSize') listSize: { sizeId: number; quantity: number }[],
+    @Body('sizeIds') sizeIds: number[],
   ) {
     return this.productService.createProduct(
       categoryId,
@@ -78,7 +78,7 @@ export class ProductController {
       description,
       image01,
       image02,
-      listSize,
+      sizeIds,
     );
   }
 
