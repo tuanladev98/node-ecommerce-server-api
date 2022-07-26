@@ -33,7 +33,7 @@ export class ProductService {
     description: string,
     image01: string,
     image02: string,
-    sizeIds: number[],
+    sizeIds?: number[],
   ) {
     return this.productRepository.createProduct(
       this.productRepository.create({
