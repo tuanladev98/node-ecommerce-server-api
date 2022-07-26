@@ -95,6 +95,7 @@ export class ProductController {
     @Body('image01') image01: string,
     @Body('image02') image02: string,
     @Body('categoryId') categoryId: number,
+    @Body('sizeIds') sizeIds?: number[],
   ) {
     return this.productService.updateProduct(
       productId,
@@ -105,6 +106,7 @@ export class ProductController {
       image01,
       image02,
       categoryId,
+      sizeIds,
     );
   }
 
@@ -148,7 +150,7 @@ export class ProductController {
   @Get('detail-for-admin/:productId')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN)
-  getDetailForAdminSite() {
-    return this.productService.getAllForAdminSite();
+  getDetailForAdminSite(@Param('productId') productId: number) {
+    return this.productService.getDetailForAdminSite(productId);
   }
 }

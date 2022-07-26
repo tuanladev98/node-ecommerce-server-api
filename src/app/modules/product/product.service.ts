@@ -59,6 +59,7 @@ export class ProductService {
     image01: string,
     image02: string,
     categoryId: number,
+    sizeIds?: number[],
   ) {
     const product = await this.productRepository.findOne(productId);
     if (!product) throw new BadRequestException('Product does not exist.');
@@ -71,7 +72,7 @@ export class ProductService {
     product.image02 = image02 ?? product.image02;
     product.categoryId = categoryId ?? product.categoryId;
 
-    return await this.productRepository.save(product);
+    return await this.productRepository.updateProduct(product, sizeIds);
   }
 
   async deleteProduct(productId: number) {
@@ -157,18 +158,15 @@ export class ProductService {
       .getRawMany();
   }
 
-  async getDetailForAdminSite(productId: number) {
-    const productInfo = await this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.category', 'category')
-      .leftJoinAndSelect('product.productToSizes', 'prod_size')
-      .leftJoinAndSelect('prod_size.size', 'size')
-      .where('product.id = :productId', { productId })
-      .getOne();
-
-    return {
-      productInfo,
-      statsSalesPerformanceRecent3Month: [],
-    };
+  getDetailForAdminSite(productId: number) {
+    return (
+      this.productRepository
+        .createQueryBuilder('product')
+        .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.productToSizes', 'prod_size')
+        // .leftJoinAndSelect('prod_size.size', 'size')
+        .where('product.id = :productId', { productId })
+        .getOne()
+    );
   }
 }

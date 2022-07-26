@@ -35,4 +35,40 @@ export class ProductRepository extends Repository<ProductEntity> {
       throw err;
     }
   }
+
+  async updateProduct(prodInstance: ProductEntity, sizeIds?: number[]) {
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const product = await queryRunner.manager.save(prodInstance);
+
+      if (sizeIds) {
+        await queryRunner.manager.delete(ProductSizeEntity, {
+          productId: product.id,
+        });
+
+        await queryRunner.manager.save(
+          sizeIds.map((sizeId) => {
+            return queryRunner.manager.create(ProductSizeEntity, {
+              productId: product.id,
+              sizeId,
+              quantity: Math.floor(Math.random() * 20),
+            });
+          }),
+        );
+      }
+
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+
+      return product;
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      throw err;
+    }
+  }
 }
