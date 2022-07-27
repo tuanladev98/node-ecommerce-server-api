@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 
 import { StatsService } from './stats.service';
 import { JwtAuthGuard } from 'src/app/vendors/guards/jwt_auth.guard';
@@ -39,5 +39,12 @@ export class StatsController {
   @Roles(UserRole.ADMIN)
   statsListNewestTransaction() {
     return this.statsService.getNewestTransactions();
+  }
+
+  @Get('product-sales-performance/:productId')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  statsProductSalesPerformance(@Param('productId') productId: number) {
+    return this.statsService.statsProductSalesPerformance(productId);
   }
 }

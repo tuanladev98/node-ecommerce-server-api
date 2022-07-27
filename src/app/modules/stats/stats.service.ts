@@ -6,6 +6,7 @@ import { OrderRepository } from 'src/app/repositories/order.repository';
 import { UserRepository } from 'src/app/repositories/user.repository';
 import { UserLogType, UserRole } from 'src/app/vendors/common/enums';
 import { UserLogRepository } from 'src/app/repositories/user_log.repository';
+import { BillEntity } from 'src/app/database/entities/bill.entity';
 
 @Injectable()
 export class StatsService {
@@ -159,6 +160,82 @@ export class StatsService {
 
     let i = 1;
     while (i < 12) {
+      const curLastItem = listMonth[listMonth.length - 1];
+      if (curLastItem.month === 12) {
+        listMonth.push({
+          year: curLastItem.year + 1,
+          month: 1,
+          quantity: Number(
+            data.find(
+              (ele) =>
+                ele.createdYear === curLastItem.year + 1 &&
+                ele.createdMonth === 1,
+            )?.quantity,
+          ),
+        });
+      } else {
+        listMonth.push({
+          year: curLastItem.year,
+          month: curLastItem.month + 1,
+          quantity: Number(
+            data.find(
+              (ele) =>
+                ele.createdYear === curLastItem.year &&
+                ele.createdMonth === curLastItem.month + 1,
+            )?.quantity,
+          ),
+        });
+      }
+      i++;
+    }
+
+    return listMonth;
+  }
+
+  async statsProductSalesPerformance(productId: number) {
+    const fromDate: Date = (
+      await this.dbConnection.query(
+        'SELECT DATE_ADD(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL 3 MONTH)), INTERVAL 1 DAY) AS fromDate',
+      )
+    )[0].fromDate;
+
+    const [yyyy, mm] = fromDate.toISOString().split('T')[0].split('-');
+
+    const data = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoin(BillEntity, 'bill', 'bill.order_id = order.id')
+      .select([
+        'YEAR(order.created_at) AS createdYear',
+        'MONTH(order.created_at) AS createdMonth',
+        'SUM(bill.quantity) AS quantity',
+      ])
+      .where('order.created_at > :fromDate', {
+        fromDate: fromDate.toISOString(),
+      })
+      .andWhere('order.stripe_succeeded_payment_intent_id IS NOT NULL')
+      .andWhere('bill.product_id = :productId', { productId })
+      .groupBy('createdYear')
+      .addGroupBy('createdMonth')
+      .orderBy('createdYear', 'ASC')
+      .addOrderBy('createdMonth', 'ASC')
+      .getRawMany();
+
+    const listMonth: { year: number; month: number; quantity: number }[] = [
+      {
+        year: Number(yyyy),
+        month: Number(mm),
+        quantity: Number(
+          data.find(
+            (ele) =>
+              ele.createdYear === Number(yyyy) &&
+              ele.createdMonth === Number(mm),
+          )?.quantity,
+        ),
+      },
+    ];
+
+    let i = 1;
+    while (i < 3) {
       const curLastItem = listMonth[listMonth.length - 1];
       if (curLastItem.month === 12) {
         listMonth.push({
