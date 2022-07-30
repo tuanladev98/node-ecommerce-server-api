@@ -129,7 +129,13 @@ export class ProductService {
     return { ...product, availableSizes };
   }
 
-  filter(categoryId: number, gender: string, sort: string, userId?: number) {
+  filter(
+    keyword: string,
+    categoryId: number,
+    gender: string,
+    sort: string,
+    userId?: number,
+  ) {
     const query = this.productRepository
       .createQueryBuilder('product')
       .select([
@@ -152,6 +158,7 @@ export class ProductService {
         { userId },
       )
       .where('product.is_delete = 0');
+    if (keyword) query.andWhere(`product.product_name LIKE '%${keyword}%'`);
     if (categoryId)
       query.andWhere('product.category_id = :categoryId', { categoryId });
     if (gender && gender !== 'ALL')

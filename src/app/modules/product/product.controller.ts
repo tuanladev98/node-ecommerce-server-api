@@ -130,12 +130,20 @@ export class ProductController {
   @Get('filter')
   @HttpCode(200)
   filter(
+    @Query('keyword') keyword: string,
     @Query('categoryId') categoryId: number,
     @Query('gender') gender: string,
     @Query('sort') sort: string,
     @Query('userId') userId?: number,
   ) {
-    return this.productService.filter(categoryId, gender, sort, userId);
+    console.log(keyword);
+    return this.productService.filter(
+      keyword,
+      categoryId,
+      gender,
+      sort,
+      userId,
+    );
   }
 
   @Get('popular')
