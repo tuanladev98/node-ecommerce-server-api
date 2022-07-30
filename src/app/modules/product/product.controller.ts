@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -118,20 +119,29 @@ export class ProductController {
     return this.productService.deleteProduct(productId);
   }
 
+  @Put('toggle-favorite/:productId')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.CLIENT)
+  toggleFavoriteStatus(@Req() req, @Param('productId') productId: number) {
+    const userId: number = req.user.userId;
+    return this.productService.toggleFavoriteStatus(userId, productId);
+  }
+
   @Get('filter')
   @HttpCode(200)
   filter(
     @Query('categoryId') categoryId: number,
     @Query('gender') gender: string,
     @Query('sort') sort: string,
+    @Query('userId') userId?: number,
   ) {
-    return this.productService.filter(categoryId, gender, sort);
+    return this.productService.filter(categoryId, gender, sort, userId);
   }
 
   @Get('popular')
   @HttpCode(200)
-  getPopularProduct() {
-    return this.productService.getPopularProduct();
+  getPopularProduct(@Query('userId') userId?: number) {
+    return this.productService.getPopularProduct(userId);
   }
 
   @Get('find/:code')

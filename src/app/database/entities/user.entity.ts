@@ -5,6 +5,7 @@ import { CartEntity } from './cart.entity';
 import { OrderEntity } from './order.entity';
 import { MessageEntity } from './message.entity';
 import { UserLogEntity } from './user_log.entity';
+import { WishlistEntity } from './wishlist.entity';
 
 @Entity('user')
 export class UserEntity extends CommonBaseEntity {
@@ -40,4 +41,7 @@ export class UserEntity extends CommonBaseEntity {
 
   @OneToMany(() => UserLogEntity, (userLog) => userLog.user)
   userLogs: UserLogEntity[];
+
+  @OneToMany(() => WishlistEntity, (wishlist) => wishlist.user)
+  wishlists: WishlistEntity[];
 }

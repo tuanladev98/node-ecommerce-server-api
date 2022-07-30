@@ -12,6 +12,7 @@ import { CategoryEntity } from './m_category.entity';
 import { ProductSizeEntity } from './product_size.entity';
 import { BillEntity } from './bill.entity';
 import { CartEntity } from './cart.entity';
+import { WishlistEntity } from './wishlist.entity';
 
 @Entity('product')
 export class ProductEntity extends CommonBaseEntity {
@@ -57,4 +58,7 @@ export class ProductEntity extends CommonBaseEntity {
 
   @OneToMany(() => CartEntity, (cart) => cart.product)
   carts: CartEntity[];
+
+  @OneToMany(() => WishlistEntity, (wishlist) => wishlist.product)
+  wishlists: WishlistEntity[];
 }

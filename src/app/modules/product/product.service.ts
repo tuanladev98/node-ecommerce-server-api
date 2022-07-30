@@ -1,14 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProductSizeEntity } from 'src/app/database/entities/product_size.entity';
+import { WishlistEntity } from 'src/app/database/entities/wishlist.entity';
 
 import { ProductRepository } from 'src/app/repositories/product.repository';
 import { SizeRepository } from 'src/app/repositories/size.repository';
+import { WishlistRepository } from 'src/app/repositories/wishlist.repository';
 import { Gender } from 'src/app/vendors/common/enums';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly productRepository: ProductRepository,
+    private readonly wishlistRepository: WishlistRepository,
     private readonly sizeRepository: SizeRepository,
   ) {}
 
@@ -75,6 +78,26 @@ export class ProductService {
     return await this.productRepository.updateProduct(product, sizeIds);
   }
 
+  async toggleFavoriteStatus(userId: number, productId: number) {
+    const wishlist = await this.wishlistRepository.findOne({
+      where: { userId, productId },
+    });
+
+    if (!wishlist) {
+      await this.wishlistRepository.save(
+        this.wishlistRepository.create({ userId, productId, isFavorite: 1 }),
+      );
+      return { isFavorite: true };
+    }
+
+    wishlist.isFavorite = wishlist.isFavorite === 0 ? 1 : 0;
+    await this.wishlistRepository.save(wishlist);
+
+    return {
+      isFavorite: !!wishlist.isFavorite,
+    };
+  }
+
   async deleteProduct(productId: number) {
     const product = await this.productRepository.findOne(productId);
     if (!product || product.isDelete)
@@ -106,10 +129,28 @@ export class ProductService {
     return { ...product, availableSizes };
   }
 
-  filter(categoryId: number, gender: string, sort: string) {
+  filter(categoryId: number, gender: string, sort: string, userId?: number) {
     const query = this.productRepository
       .createQueryBuilder('product')
-      .leftJoinAndSelect('product.category', 'category')
+      .select([
+        'product.id AS id',
+        'product.code AS code',
+        'product.product_name AS productName',
+        'product.description AS description',
+        'product.price AS price',
+        'product.gender AS gender',
+        'product.image01 AS image01',
+        'product.image01 AS image01',
+        'category.category_name AS categoryName',
+        'wishlist.is_favorite AS isFavorite',
+      ])
+      .leftJoin('product.category', 'category')
+      .leftJoin(
+        WishlistEntity,
+        'wishlist',
+        'wishlist.product_id = product.id AND wishlist.user_id = :userId',
+        { userId },
+      )
       .where('product.is_delete = 0');
     if (categoryId)
       query.andWhere('product.category_id = :categoryId', { categoryId });
@@ -121,17 +162,35 @@ export class ProductService {
       if (sort === 'PRICE_DESC') query.orderBy('product.price', 'DESC');
     }
 
-    return query.getMany();
+    return query.getRawMany();
   }
 
-  getPopularProduct() {
+  getPopularProduct(userId?: number) {
     return this.productRepository
       .createQueryBuilder('product')
-      .leftJoinAndSelect('product.category', 'category')
+      .select([
+        'product.id AS id',
+        'product.code AS code',
+        'product.product_name AS productName',
+        'product.description AS description',
+        'product.price AS price',
+        'product.gender AS gender',
+        'product.image01 AS image01',
+        'product.image01 AS image01',
+        'category.category_name AS categoryName',
+        'wishlist.is_favorite AS isFavorite',
+      ])
+      .leftJoin('product.category', 'category')
+      .leftJoin(
+        WishlistEntity,
+        'wishlist',
+        'wishlist.product_id = product.id AND wishlist.user_id = :userId',
+        { userId },
+      )
       .where('product.is_delete = 0')
       .orderBy('RAND()')
-      .take(6)
-      .getMany();
+      .limit(6)
+      .getRawMany();
   }
 
   getAllForAdminSite() {
