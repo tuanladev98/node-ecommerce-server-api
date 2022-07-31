@@ -171,4 +171,26 @@ export class ProductController {
   getDetailForAdminSite(@Param('productId') productId: number) {
     return this.productService.getDetailForAdminSite(productId);
   }
+
+  @Post('review')
+  @HttpCode(200)
+  reviewProduct(
+    @Body('productId') productId: number,
+    @Body('title') title: string,
+    @Body('ratingPoint') ratingPoint: number,
+    @Body('comment') comment: string,
+  ) {
+    return this.productService.reviewProduct(
+      productId,
+      title,
+      ratingPoint,
+      comment,
+    );
+  }
+
+  @Get('review/:productId')
+  @HttpCode(200)
+  getReviews(@Param('productId') productId: number) {
+    return this.productService.getReviews(productId);
+  }
 }

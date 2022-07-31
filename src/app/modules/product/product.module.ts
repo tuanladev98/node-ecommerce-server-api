@@ -7,6 +7,7 @@ import { ProductRepository } from 'src/app/repositories/product.repository';
 import { SizeRepository } from 'src/app/repositories/size.repository';
 import { FirebaseStorageService } from './firebase_storage.service';
 import { WishlistRepository } from 'src/app/repositories/wishlist.repository';
+import { ReviewRepository } from 'src/app/repositories/review.repository';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { WishlistRepository } from 'src/app/repositories/wishlist.repository';
       ProductRepository,
       SizeRepository,
       WishlistRepository,
+      ReviewRepository,
     ]),
   ],
   controllers: [ProductController],

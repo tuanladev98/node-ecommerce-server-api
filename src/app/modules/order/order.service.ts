@@ -8,6 +8,7 @@ import { OrderRepository } from 'src/app/repositories/order.repository';
 import { OrderEntity } from 'src/app/database/entities/order.entity';
 import { BillEntity } from 'src/app/database/entities/bill.entity';
 import { CartEntity } from 'src/app/database/entities/cart.entity';
+import { OrderStatus } from 'src/app/vendors/common/enums';
 
 @Injectable()
 export class OrderService {
@@ -111,9 +112,44 @@ export class OrderService {
 
     if (!order || order.userId !== userId) return null;
 
-    console.log(order);
-
     return order;
+  }
+
+  async updateGHN(orderCode: string, ghnCode: string) {
+    const order = await this.orderRepository.findOne({ where: { orderCode } });
+
+    if (!order) throw new BadRequestException('order not found!');
+
+    order.ghnShippingCode = ghnCode;
+
+    if (order.status === OrderStatus.PROCESSING)
+      order.status = OrderStatus.PREPARING_SHIPMENT;
+
+    return await this.orderRepository.save(order);
+  }
+
+  async markDelivered(orderCode: string) {
+    const order = await this.orderRepository.findOne({ where: { orderCode } });
+
+    if (!order) throw new BadRequestException('order not found!');
+
+    if (!order.ghnShippingCode) {
+      order.status = OrderStatus.PROCESSING;
+      return await this.orderRepository.save(order);
+    }
+
+    if (
+      order.ghnShippingCode &&
+      order.status === OrderStatus.PREPARING_SHIPMENT
+    ) {
+      order.status = OrderStatus.DELIVERED;
+      return await this.orderRepository.save(order);
+    }
+
+    if (order.ghnShippingCode && order.status === OrderStatus.DELIVERED) {
+      order.status = OrderStatus.PREPARING_SHIPMENT;
+      return await this.orderRepository.save(order);
+    }
   }
 
   getOrderHistory(userId: number) {
@@ -136,6 +172,18 @@ export class OrderService {
       .leftJoinAndSelect('bill.size', 'size')
       .orderBy('order.created_at', 'DESC')
       .getMany();
+  }
+
+  async getOrderDetailForAdmin(orderCode: string) {
+    const order = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.bills', 'bill')
+      .leftJoinAndSelect('bill.product', 'product')
+      .leftJoinAndSelect('bill.size', 'size')
+      .where('order.order_code = :orderCode', { orderCode })
+      .getOne();
+
+    return order;
   }
 
   updateOrderPayment(orderCode: string, paymentIntentId: string) {

@@ -79,6 +79,30 @@ export class OrderController {
     return this.orderService.getAll();
   }
 
+  @Get('order-detail-for-admin/:orderCode')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  getOrderDetailForAdmin(@Param('orderCode') orderCode: string) {
+    return this.orderService.getOrderDetailForAdmin(orderCode);
+  }
+
+  @Put('update-ghn/:orderCode')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  updateGHN(
+    @Param('orderCode') orderCode: string,
+    @Body('ghnCode') ghnCode: string,
+  ) {
+    return this.orderService.updateGHN(orderCode, ghnCode);
+  }
+
+  @Put('mark-delivered/:orderCode')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  markDelivered(@Param('orderCode') orderCode: string) {
+    return this.orderService.markDelivered(orderCode);
+  }
+
   @Post('create-stripe-payment-intent')
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.CLIENT)

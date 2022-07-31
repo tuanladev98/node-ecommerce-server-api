@@ -3,6 +3,7 @@ import { ProductSizeEntity } from 'src/app/database/entities/product_size.entity
 import { WishlistEntity } from 'src/app/database/entities/wishlist.entity';
 
 import { ProductRepository } from 'src/app/repositories/product.repository';
+import { ReviewRepository } from 'src/app/repositories/review.repository';
 import { SizeRepository } from 'src/app/repositories/size.repository';
 import { WishlistRepository } from 'src/app/repositories/wishlist.repository';
 import { Gender } from 'src/app/vendors/common/enums';
@@ -12,6 +13,7 @@ export class ProductService {
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly wishlistRepository: WishlistRepository,
+    private readonly reviewRepository: ReviewRepository,
     private readonly sizeRepository: SizeRepository,
   ) {}
 
@@ -126,7 +128,13 @@ export class ProductService {
       .orderBy('size.id', 'ASC')
       .getMany();
 
-    return { ...product, availableSizes };
+    const reviews = await this.reviewRepository
+      .createQueryBuilder('review')
+      .where('review.product_id = :productId', { productId: product.id })
+      .orderBy('review.created_at', 'DESC')
+      .getMany();
+
+    return { ...product, availableSizes, reviews };
   }
 
   filter(
@@ -224,15 +232,45 @@ export class ProductService {
       .getRawMany();
   }
 
-  getDetailForAdminSite(productId: number) {
-    return (
-      this.productRepository
-        .createQueryBuilder('product')
-        .leftJoinAndSelect('product.category', 'category')
-        .leftJoinAndSelect('product.productToSizes', 'prod_size')
-        // .leftJoinAndSelect('prod_size.size', 'size')
-        .where('product.id = :productId', { productId })
-        .getOne()
+  async getDetailForAdminSite(productId: number) {
+    const product = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.productToSizes', 'prod_size')
+      // .leftJoinAndSelect('prod_size.size', 'size')
+      .where('product.id = :productId', { productId })
+      .getOne();
+
+    const reviews = await this.reviewRepository
+      .createQueryBuilder('review')
+      .where('review.product_id = :productId', { productId: product.id })
+      .orderBy('review.created_at', 'DESC')
+      .getMany();
+
+    return { ...product, reviews };
+  }
+
+  reviewProduct(
+    productId: number,
+    title: string,
+    ratingPoint: number,
+    comment: string,
+  ) {
+    return this.reviewRepository.save(
+      this.reviewRepository.create({
+        productId,
+        title,
+        ratingPoint,
+        comment,
+      }),
     );
+  }
+
+  getReviews(productId: number) {
+    return this.reviewRepository
+      .createQueryBuilder('review')
+      .where('review.product_id = :productId', { productId })
+      .orderBy('review.created_at', 'DESC')
+      .getMany();
   }
 }
