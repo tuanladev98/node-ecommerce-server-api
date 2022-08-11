@@ -47,4 +47,32 @@ export class StatsController {
   statsProductSalesPerformance(@Param('productId') productId: number) {
     return this.statsService.statsProductSalesPerformance(productId);
   }
+
+  @Get('total-by-units')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  statsTotalByUnits() {
+    return this.statsService.statsTotalByUnits();
+  }
+
+  @Get('sales-performance-by-cat')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  statsSalePerformanceByCategory() {
+    return this.statsService.statsSalePerformanceByCategory();
+  }
+
+  @Get('transactions-latest-six-month')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  statsTransactionsLatestSixMonth() {
+    return this.statsService.statsTransactionsLatestSixMonth();
+  }
+
+  @Get('income-latest-six-month')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  statsIncomeLatestSixMonth() {
+    return this.statsService.statsIncomeLatestSixMonth();
+  }
 }

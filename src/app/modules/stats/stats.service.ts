@@ -7,14 +7,21 @@ import { UserRepository } from 'src/app/repositories/user.repository';
 import { UserLogType, UserRole } from 'src/app/vendors/common/enums';
 import { UserLogRepository } from 'src/app/repositories/user_log.repository';
 import { BillEntity } from 'src/app/database/entities/bill.entity';
+import { ProductRepository } from 'src/app/repositories/product.repository';
+import { ReviewRepository } from 'src/app/repositories/review.repository';
+import { CategoryRepository } from 'src/app/repositories/category.repository';
+import { ProductEntity } from 'src/app/database/entities/product.entity';
 
 @Injectable()
 export class StatsService {
   constructor(
     private readonly dbConnection: Connection,
     private readonly billRepository: BillRepository,
+    private readonly categoryRepository: CategoryRepository,
     private readonly orderRepository: OrderRepository,
     private readonly userRepository: UserRepository,
+    private readonly productRepository: ProductRepository,
+    private readonly reviewRepository: ReviewRepository,
     private readonly userLogRepository: UserLogRepository,
   ) {}
 
@@ -236,6 +243,206 @@ export class StatsService {
 
     let i = 1;
     while (i < 3) {
+      const curLastItem = listMonth[listMonth.length - 1];
+      if (curLastItem.month === 12) {
+        listMonth.push({
+          year: curLastItem.year + 1,
+          month: 1,
+          quantity: Number(
+            data.find(
+              (ele) =>
+                ele.createdYear === curLastItem.year + 1 &&
+                ele.createdMonth === 1,
+            )?.quantity,
+          ),
+        });
+      } else {
+        listMonth.push({
+          year: curLastItem.year,
+          month: curLastItem.month + 1,
+          quantity: Number(
+            data.find(
+              (ele) =>
+                ele.createdYear === curLastItem.year &&
+                ele.createdMonth === curLastItem.month + 1,
+            )?.quantity,
+          ),
+        });
+      }
+      i++;
+    }
+
+    return listMonth;
+  }
+
+  async statsTotalByUnits() {
+    const customers = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.role = :role', { role: UserRole.CLIENT })
+      .getCount();
+
+    const products = await this.productRepository
+      .createQueryBuilder('product')
+      .where('product.is_delete = FALSE')
+      .getCount();
+
+    const transactions = await this.orderRepository
+      .createQueryBuilder('order')
+      .getCount();
+
+    const reviews = await this.reviewRepository
+      .createQueryBuilder('review')
+      .getCount();
+
+    return [
+      {
+        name: 'Customers',
+        quantity: customers,
+      },
+      {
+        name: 'Products',
+        quantity: products,
+      },
+      {
+        name: 'Transactions',
+        quantity: transactions,
+      },
+      {
+        name: 'Reviews',
+        quantity: reviews,
+      },
+    ];
+  }
+
+  statsSalePerformanceByCategory() {
+    return this.categoryRepository
+      .createQueryBuilder('cat')
+      .select([
+        'cat.id AS id',
+        'cat.category_name AS name',
+        'SUM(bill.quantity) AS sales',
+      ])
+      .leftJoin(ProductEntity, 'prod', 'prod.category_id = cat.id')
+      .leftJoin(BillEntity, 'bill', 'bill.product_id = prod.id')
+      .groupBy('cat.id')
+      .getRawMany();
+  }
+
+  async statsTransactionsLatestSixMonth() {
+    const fromDate: Date = (
+      await this.dbConnection.query(
+        'SELECT DATE_ADD(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL 6 MONTH)), INTERVAL 1 DAY) AS fromDate',
+      )
+    )[0].fromDate;
+
+    const [yyyy, mm] = fromDate.toISOString().split('T')[0].split('-');
+
+    const data = await this.orderRepository
+      .createQueryBuilder('order')
+      .select([
+        'YEAR(order.created_at) AS createdYear',
+        'MONTH(order.created_at) AS createdMonth',
+        'COUNT(order.id) AS quantity',
+      ])
+      .where('order.created_at > :fromDate', {
+        fromDate: fromDate.toISOString(),
+      })
+      .groupBy('createdYear')
+      .addGroupBy('createdMonth')
+      .orderBy('createdYear', 'ASC')
+      .addOrderBy('createdMonth', 'ASC')
+      .getRawMany();
+
+    const listMonth: { year: number; month: number; quantity: number }[] = [
+      {
+        year: Number(yyyy),
+        month: Number(mm),
+        quantity: Number(
+          data.find(
+            (ele) =>
+              ele.createdYear === Number(yyyy) &&
+              ele.createdMonth === Number(mm),
+          )?.quantity,
+        ),
+      },
+    ];
+
+    let i = 1;
+    while (i < 6) {
+      const curLastItem = listMonth[listMonth.length - 1];
+      if (curLastItem.month === 12) {
+        listMonth.push({
+          year: curLastItem.year + 1,
+          month: 1,
+          quantity: Number(
+            data.find(
+              (ele) =>
+                ele.createdYear === curLastItem.year + 1 &&
+                ele.createdMonth === 1,
+            )?.quantity,
+          ),
+        });
+      } else {
+        listMonth.push({
+          year: curLastItem.year,
+          month: curLastItem.month + 1,
+          quantity: Number(
+            data.find(
+              (ele) =>
+                ele.createdYear === curLastItem.year &&
+                ele.createdMonth === curLastItem.month + 1,
+            )?.quantity,
+          ),
+        });
+      }
+      i++;
+    }
+
+    return listMonth;
+  }
+
+  async statsIncomeLatestSixMonth() {
+    const fromDate: Date = (
+      await this.dbConnection.query(
+        'SELECT DATE_ADD(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL 6 MONTH)), INTERVAL 1 DAY) AS fromDate',
+      )
+    )[0].fromDate;
+
+    const [yyyy, mm] = fromDate.toISOString().split('T')[0].split('-');
+
+    const data = await this.orderRepository
+      .createQueryBuilder('order')
+      .select([
+        'YEAR(order.created_at) AS createdYear',
+        'MONTH(order.created_at) AS createdMonth',
+        'SUM(order.amount) AS quantity',
+      ])
+      .where('order.created_at > :fromDate', {
+        fromDate: fromDate.toISOString(),
+      })
+      .andWhere('order.stripe_succeeded_payment_intent_id IS NOT NULL')
+      .groupBy('createdYear')
+      .addGroupBy('createdMonth')
+      .orderBy('createdYear', 'ASC')
+      .addOrderBy('createdMonth', 'ASC')
+      .getRawMany();
+
+    const listMonth: { year: number; month: number; quantity: number }[] = [
+      {
+        year: Number(yyyy),
+        month: Number(mm),
+        quantity: Number(
+          data.find(
+            (ele) =>
+              ele.createdYear === Number(yyyy) &&
+              ele.createdMonth === Number(mm),
+          )?.quantity,
+        ),
+      },
+    ];
+
+    let i = 1;
+    while (i < 6) {
       const curLastItem = listMonth[listMonth.length - 1];
       if (curLastItem.month === 12) {
         listMonth.push({
